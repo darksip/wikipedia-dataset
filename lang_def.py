@@ -85,6 +85,7 @@ WIKIPEDIA_LANGUAGES = {
         "en",
         "eo",
         "es",
+        "et",
         "eu",
         "ext",
         "fa",
