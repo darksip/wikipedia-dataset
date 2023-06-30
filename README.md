@@ -751,10 +751,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
-    num_bytes: 432954620
+    num_bytes: 425710145
     num_examples: 194486
-  download_size: 228131005
-  dataset_size: 432954620
+  download_size: 225589717
+  dataset_size: 425710145
 - config_name: 20230601.azb
   features:
   - name: id
@@ -1167,10 +1167,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
-    num_bytes: 4717690463
+    num_bytes: 4569352784
     num_examples: 6124009
-  download_size: 938189255
-  dataset_size: 4717690463
+  download_size: 926156250
+  dataset_size: 4569352784
 - config_name: 20230601.ch
   features:
   - name: id
@@ -5583,10 +5583,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
-    num_bytes: 448338371
-    num_examples: 200748
-  download_size: 279406863
-  dataset_size: 448338371
+    num_bytes: 438311404
+    num_examples: 200747
+  download_size: 275098294
+  dataset_size: 438311404
 - config_name: 20230601.simple
   features:
   - name: id
@@ -5615,10 +5615,10 @@ dataset_info:
     dtype: string
   splits:
   - name: train
-    num_bytes: 803137068
+    num_bytes: 789472198
     num_examples: 156273
-  download_size: 261269512
-  dataset_size: 803137068
+  download_size: 258263767
+  dataset_size: 789472198
 ---
 
 # Wikipedia
@@ -5633,10 +5633,11 @@ of this dataset are:
 - all available languages are preprocessed (including the largests: `en` and
   `ceb`)
 
-| version | dump     | # available languages   | closed & dump                                   | closed & no dump  |
-| -----   | ----     | -----                   | ------                                          | ---               |
-| `1.0.0` | 20230601 | 328                     | 9: ak (soon), cho, ho, ii, kj, lrc, mh, mus, ng | 4: aa, hz, kr, na |
-|         | 20230901 | see you in September... |                                                 |                   |
+| version | dump     | # available languages               | closed & dump                                   | closed & no dump  |
+| -----   | ----     | -----                               | ------                                          | ---               |
+| `1.0.0` | 20230601 | 328                                 | 9: ak (soon), cho, ho, ii, kj, lrc, mh, mus, ng | 4: aa, hz, kr, na |
+| `1.1.0` | 20230601 | 329 (+et ~[az,ceb,ch,hr,ii,lrc,ta]) | 9: ak (soon), cho, ho, ii, kj, lrc, mh, mus, ng | 4: aa, hz, kr, na |
+|         | 20230901 | see you in September...             |                                                 |                   |
 
 Source: [List of Wikimedia
 Languages](https://en.wikipedia.org/wiki/List_of_Wikipedias). A few (9)
@@ -5645,6 +5646,12 @@ still available. In addition, very few (4) Wikimedias are closed and don't
 have dumps anymore.
 
 ## Release Notes
+
+`1.1.0`
+
+- **feat**: Add missing estonian (my bad), thanks Chris Ha
+- **fix**: update category lists for az, ceb, ch, hr, ii, lrc, ta, which means
+  they were all processed again.
 
 `1.0.0`
 

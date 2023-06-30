@@ -120,6 +120,11 @@ MEDIA_ALIASES = {
     "Imagen",
     "Medio"
   ],
+  "az": [
+    "Fayl",
+    "Mediya",
+    "Şəkil"
+  ],
   "azb": [
     "تصویر",
     "رسانه",
@@ -237,6 +242,11 @@ MEDIA_ALIASES = {
     "Файл",
     "Хlум"
   ],
+  "ceb": [
+    "Imahen",
+    "Medya",
+    "Payl"
+  ],
   "ch": [
     "Litratu"
   ],
@@ -330,6 +340,11 @@ MEDIA_ALIASES = {
     "Archivo",
     "Imagen",
     "Medio"
+  ],
+  "et": [
+    "Fail",
+    "Meedia",
+    "Pilt"
   ],
   "eu": [
     "Fitxategi",
@@ -495,6 +510,13 @@ MEDIA_ALIASES = {
     "file",
     "saadhan"
   ],
+  "hr": [
+    "DT",
+    "Datoteka",
+    "F",
+    "Mediji",
+    "Slika"
+  ],
   "hsb": [
     "Bild",
     "Dataja",
@@ -531,6 +553,16 @@ MEDIA_ALIASES = {
     "Nká",
     "Usòrò",
     "Ákwúkwó orünotu"
+  ],
+  "ii": [
+    "图像",
+    "圖像",
+    "媒体",
+    "媒体文件",
+    "媒體",
+    "文件",
+    "档案",
+    "檔案"
   ],
   "ilo": [
     "Midia",
@@ -725,6 +757,14 @@ MEDIA_ALIASES = {
     "ສື່",
     "ສື່ອ",
     "ຮູບ"
+  ],
+  "lrc": [
+    "أسگ",
+    "تصویر",
+    "جانیا",
+    "رسانه",
+    "رسانه‌ای",
+    "ڤارئسگأر"
   ],
   "lt": [
     "Medija",
@@ -1156,6 +1196,10 @@ MEDIA_ALIASES = {
     "文件",
     "档案",
     "檔案"
+  ],
+  "ta": [
+    "ஊடகம்",
+    "படிமம்"
   ],
   "tay": [
     "biru' na zayzyuwaw",

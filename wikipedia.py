@@ -52,7 +52,7 @@ _LICENSE = (
 
 _BASE_URL_TMPL = "data/{date}/{lang}"
 
-_VERSION = datasets.Version("1.0.0", "")
+_VERSION = datasets.Version("1.1.0", "")
 
 
 class WikipediaConfig(datasets.BuilderConfig):

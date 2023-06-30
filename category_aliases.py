@@ -75,6 +75,9 @@ CATEGORY_ALIASES = {
   "ay": [
     "Categoría"
   ],
+  "az": [
+    "Kateqoriya"
+  ],
   "azb": [
     "بؤلمه"
   ],
@@ -158,8 +161,14 @@ CATEGORY_ALIASES = {
     "Категори",
     "Тоба"
   ],
+  "ceb": [
+    "Kategoriya"
+  ],
   "ch": [
     "Katigoria"
+  ],
+  "cho": [
+    "Category"
   ],
   "chr": [
     "Category"
@@ -235,12 +244,18 @@ CATEGORY_ALIASES = {
   "eml": [
     "Categoria"
   ],
+  "en": [
+    "Category"
+  ],
   "eo": [
     "Kategorio"
   ],
   "es": [
     "CAT",
     "Categoría"
+  ],
+  "et": [
+    "Kategooria"
   ],
   "eu": [
     "Kategoria"
@@ -362,6 +377,14 @@ CATEGORY_ALIASES = {
   "hif": [
     "vibhag"
   ],
+  "ho": [
+    "Category"
+  ],
+  "hr": [
+    "CT",
+    "KT",
+    "Kategorija"
+  ],
   "hsb": [
     "Kategorija"
   ],
@@ -389,6 +412,10 @@ CATEGORY_ALIASES = {
   "ig": [
     "Ébéonọr",
     "Òtù"
+  ],
+  "ii": [
+    "分类",
+    "分類"
   ],
   "ik": [
     "Category"
@@ -451,6 +478,9 @@ CATEGORY_ALIASES = {
     "Kalasi"
   ],
   "ki": [
+    "Category"
+  ],
+  "kj": [
     "Category"
   ],
   "kk": [
@@ -549,6 +579,9 @@ CATEGORY_ALIASES = {
   "lo": [
     "ໝວດ"
   ],
+  "lrc": [
+    "دأسە"
+  ],
   "lt": [
     "Kategorija"
   ],
@@ -575,6 +608,9 @@ CATEGORY_ALIASES = {
   "mg": [
     "Catégorie",
     "Sokajy"
+  ],
+  "mh": [
+    "Category"
   ],
   "mhr": [
     "Категорий",
@@ -617,6 +653,9 @@ CATEGORY_ALIASES = {
   "mt": [
     "Kategorija"
   ],
+  "mus": [
+    "Category"
+  ],
   "mwl": [
     "Catadorie",
     "Categoria"
@@ -630,9 +669,6 @@ CATEGORY_ALIASES = {
   "mzn": [
     "رج",
     "رده"
-  ],
-  "na": [
-    "Category"
   ],
   "nah": [
     "Categoría",
@@ -655,6 +691,9 @@ CATEGORY_ALIASES = {
   ],
   "new": [
     "पुचः"
+  ],
+  "ng": [
+    "Category"
   ],
   "nia": [
     "Kategori"
@@ -831,6 +870,9 @@ CATEGORY_ALIASES = {
   "si": [
     "ප්‍රවර්ගය"
   ],
+  "simple": [
+    "Category"
+  ],
   "sk": [
     "Kategória"
   ],
@@ -890,6 +932,9 @@ CATEGORY_ALIASES = {
     "kakuniza",
     "分类",
     "分類"
+  ],
+  "ta": [
+    "பகுப்பு"
   ],
   "tay": [
     "zyuwaw na",
