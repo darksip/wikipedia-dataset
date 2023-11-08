@@ -100,7 +100,7 @@ class WikipediaConfig(datasets.BuilderConfig):
 
 # _DATE = "20220301"
 
-
+User
 class Wikipedia(datasets.BeamBasedBuilder):
     """Wikipedia dataset."""
 
@@ -113,6 +113,9 @@ class Wikipedia(datasets.BeamBasedBuilder):
         )  # pylint:disable=g-complex-comprehension
         for lang in WIKIPEDIA_LANGUAGES
     ]
+
+    logging.basicConfig(filename='unhandled_templates.log', level=logging.INFO)
+    progress = 0
 
     def _info(self):
         return datasets.DatasetInfo(
@@ -194,8 +197,8 @@ class Wikipedia(datasets.BeamBasedBuilder):
                 context = etree.iterparse(utf_f, events=("end",))
                 for unused_event, elem in context:
                     counter += 1
-                    # if counter > 2000 :
-                    #     break
+                    if counter > 2000 :
+                        break
                     if not elem.tag.endswith("page"):
                         continue
                     namespace = elem.tag[:-4]
@@ -228,6 +231,9 @@ class Wikipedia(datasets.BeamBasedBuilder):
         def _clean_content(inputs, language):
             """Cleans raw wikicode to extract text."""
             id_, title, raw_content = inputs
+            progress += 1
+            if progress % 10 == 0:
+                print("progression : ", progress)
             try:
                 text = _parse_and_clean_wikicode(
                     raw_content, parser=mwparserfromhell, language=language
@@ -255,8 +261,20 @@ class Wikipedia(datasets.BeamBasedBuilder):
             | "Clean content" >> beam.FlatMap(_clean_content, language=language)
         )
 
+def load_file_to_list(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return [line.strip().lower() for line in file]
+
+def is_in_list(string_to_check, list_of_strings):
+    return string_to_check.lower() in list_of_strings
+
+tmp_to_concat = load_file_to_list("template_to_concat.txt")
+tmp_to_params = load_file_to_list("template_to_params.txt")
+tmp_to_ignore = load_file_to_list("template_to_ignore.txt")
 
 def _parse_and_clean_wikicode(raw_content, parser, language):
+    import mwparserfromhell
+
     """Strips formatting and unwanted sections from raw page content."""
     wikicode = parser.parse(raw_content)
 
@@ -284,6 +302,7 @@ def _parse_and_clean_wikicode(raw_content, parser, language):
         f"^(?:{cat_prefixes}):", flags=re.IGNORECASE | re.UNICODE
     )
 
+    re_numbers = re.compile(r"(\d+e)", re.IGNORECASE)
     def is_category(obj):
         return bool(re_clean_wikilink.match(str(obj.title)))
 
@@ -306,11 +325,73 @@ def _parse_and_clean_wikicode(raw_content, parser, language):
             # For unknown reasons, objects are sometimes not found.
             pass
 
+    def get_template_name_and_params(template):
+        template_name = template.name.strip_code().strip()
+        template_params = ' '.join(param.value.strip_code().strip() for param in template.params)
+        return (template_name, template_params)
+    
+    def clean_template(obj, section):
+        try:
+            name, params = get_template_name_and_params(obj)
+            if name.lower().startswith("date"):
+                new_text = params
+            elif name.lower() in ["s","s-"]:
+                eme = "ème" if params.lower()!="i" else "er"
+                new_text = f"{params} {eme} siècle"
+            elif name.lower() in ["-s","-s-"]:
+                eme = "ème" if params.lower()!="i" else "er"
+                new_text = f"{params} {eme} siècle av. JC"
+            elif re_numbers.match(name):
+                new_text = f"{name} {params}"
+            elif name.lower().startswith("infobox"):
+                return
+            elif name.lower().startswith("taxobox"):
+                return
+            elif name.lower() == "lang":
+                new_text = params[2:].strip()
+            elif name.lower() == "langue":
+                new_text = params[2:].strip()
+            elif name.lower().startswith("lang-"):
+                new_text = params
+            elif is_in_list(name, tmp_to_concat):
+                new_text = f"{name} : {params}"
+            elif is_in_list(name, tmp_to_params):
+                new_text = params
+            elif is_in_list(name, tmp_to_ignore):
+                return
+            elif params == "":
+                new_text = name
+            elif name == "":
+                return
+            else:
+                logging.info('Template: %s, Parameters: %s', name, params)
+                return
+                #new_text = f"{name} {{ {params} }}"
+            
+            new_template = mwparserfromhell.nodes.text.Text=new_text
+            section.replace(obj, new_template)
+        except ValueError:
+            # For unknown reasons, objects are sometimes not found.
+            pass
+
     section_text = []
+    titles_dict = {}
+
+    # Create a dictionary of section titles and their markdown levels
+    for section in wikicode.get_sections(include_lead=False, include_headings=True):
+        if section.nodes and isinstance(section.nodes[0], mwparserfromhell.nodes.heading.Heading):
+            heading = section.nodes[0].title.strip_code().strip()
+            level = section.nodes[0].level
+            # Store heading with its markdown level
+            titles_dict[heading] = level
+            section.nodes[0].title = f"z{heading}z"
+
     # Filter individual sections to clean.
     for section in wikicode.get_sections(
         flat=True, include_lead=True, include_headings=True
     ):
+
+
         for obj in section.ifilter_wikilinks(recursive=True):
             if rm_wikilink(obj):
                 try_remove_obj(obj, section)
@@ -319,7 +400,17 @@ def _parse_and_clean_wikicode(raw_content, parser, language):
         for obj in section.ifilter_tags(matches=rm_tag, recursive=True):
             try_remove_obj(obj, section)
 
-        section_text.append(re.sub(re_rm_magic, "", section.strip_code().strip()))
+        section_raw = section.strip_code().strip()
+        for obj in section.ifilter_templates(recursive=True):
+            clean_template(obj,section)
+
+        section_raw = section.strip_code().strip()
+        for heading, level in titles_dict.items():
+            # Create the markdown heading
+            markdown_heading = "#" * level + " " + heading
+            # Replace the heading with its markdown equivalent
+            section_raw = re.sub(re.escape(f"z{heading}z"), markdown_heading, section_raw, count=1)
+        section_text.append(re.sub(re_rm_magic, "", section_raw))
     return "\n\n".join(section_text)
 
 
