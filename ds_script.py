@@ -100,7 +100,6 @@ class WikipediaConfig(datasets.BuilderConfig):
 
 # _DATE = "20220301"
 
-User
 class Wikipedia(datasets.BeamBasedBuilder):
     """Wikipedia dataset."""
 
@@ -114,8 +113,8 @@ class Wikipedia(datasets.BeamBasedBuilder):
         for lang in WIKIPEDIA_LANGUAGES
     ]
 
-    logging.basicConfig(filename='unhandled_templates.log', level=logging.INFO)
-    progress = 0
+    #logging.basicConfig(filename='unhandled_templates.log', level=logging.INFO)
+    #progress = 0
 
     def _info(self):
         return datasets.DatasetInfo(
@@ -197,7 +196,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
                 context = etree.iterparse(utf_f, events=("end",))
                 for unused_event, elem in context:
                     counter += 1
-                    if counter > 2000 :
+                    if counter > 100000 :
                         break
                     if not elem.tag.endswith("page"):
                         continue
@@ -231,9 +230,9 @@ class Wikipedia(datasets.BeamBasedBuilder):
         def _clean_content(inputs, language):
             """Cleans raw wikicode to extract text."""
             id_, title, raw_content = inputs
-            progress += 1
-            if progress % 10 == 0:
-                print("progression : ", progress)
+            #progress += 1
+            #if progress % 10 == 0:
+            #    print("progression : ", progress)
             try:
                 text = _parse_and_clean_wikicode(
                     raw_content, parser=mwparserfromhell, language=language
@@ -364,7 +363,7 @@ def _parse_and_clean_wikicode(raw_content, parser, language):
             elif name == "":
                 return
             else:
-                logging.info('Template: %s, Parameters: %s', name, params)
+                #logging.info('Template: %s, Parameters: %s', name, params)
                 return
                 #new_text = f"{name} {{ {params} }}"
             

@@ -24,6 +24,17 @@ def main(
     mirror_url: str,
     override: bool = False,
 ):
+    from apache_beam.options.pipeline_options import PipelineOptions, StandardOptions
+
+    flink_options = {
+        'runner': 'FlinkRunner',
+        'flink_master': 'localhost:8081',  # Replace with your Flink master URL
+        'parallelism': 2,  # Set the parallelism
+        # Add other Flink specific options here
+    }
+
+    options = PipelineOptions(flags=[], **flink_options)
+
     for language in languages:
         print("=====================")
         print(f"start processing `{language}`")
@@ -41,20 +52,30 @@ def main(
                 print(f"done  processing `{language}` ✅")
                 print("=====================\n\n")
                 continue
-
+        
+        options = PipelineOptions([
+                    "--runner=FlinkRunner",
+                    "--flink_master=localhost:8081",
+                    "--environment_type=LOOPBACK",
+                    "--temp_location='/Users/pierresiccardi/.cache/huggingface/datasets/ds_script'",
+                    "--number_of_execution_retries=3"
+                    ])
+        
         build_kwargs = {
             "language": language.replace("-", "_"),
             "date": date,
             "mirror_url": mirror_url,
-            "beam_runner": "DirectRunner",
-            # "beam_runner": "apache_beam.runners.dask.dask_runner.DaskRunner",
+            #"beam_runner": "DirectRunner",
+            #"beam_runner": "apache_beam.runners.dask.dask_runner.DaskRunner",
+            "beam_runner": "FlinkRunner",
+            "beam_options": options,
         }
         if cache_dirpath:
             build_kwargs["cache_dir"] = str(cache_dirpath)
 
         try:
             dsd = load_dataset(
-                "./prep/ds_script.py",
+                "./ds_script.py",
                 **build_kwargs,
             )
             elapsed = datetime.now() - start_time
