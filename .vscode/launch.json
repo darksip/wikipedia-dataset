@@ -8,7 +8,7 @@
             "name": "Python : fichier actif",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "build.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": ["--date","20230901","--language","fr","--override"]

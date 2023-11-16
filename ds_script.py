@@ -25,10 +25,12 @@ import xml.etree.cElementTree as etree
 from urllib.parse import quote
 
 import datasets
+from datetime import datetime
 
 from .category_aliases import CATEGORY_ALIASES
 from .lang_def import WIKIPEDIA_LANGUAGES
 from .media_aliases import MEDIA_ALIASES
+from .db_operations import *
 
 logger = datasets.logging.get_logger(__name__)
 
@@ -113,6 +115,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
         for lang in WIKIPEDIA_LANGUAGES
     ]
 
+    session_id = 0
     #logging.basicConfig(filename='unhandled_templates.log', level=logging.INFO)
     #progress = 0
 
@@ -165,6 +168,14 @@ class Wikipedia(datasets.BeamBasedBuilder):
             total_bytes += info["size"]
             xml_urls.append(_base_url(lang) + fname)
 
+        nbfiles = len(xml_urls)
+        now = datetime.now()
+        
+
+        self.session_id = insert_new_session(now, lang, self.config.date, nbfiles)
+        print(f"session_id={self.session_id}")
+        #loop on files to count lines and insert progress entries
+
             # Use dictionary since testing mock always returns the same result.
         downloaded_files = dl_manager.download({"xml": xml_urls})
         if not pipeline.is_local():
@@ -189,6 +200,8 @@ class Wikipedia(datasets.BeamBasedBuilder):
             logger.info("generating examples from = %s", filepath)
             print(f"generating examples from = {filepath}")
             counter=0
+            print("session_id for db storage is {self.session_id}")
+            
             with beam.io.filesystems.FileSystems.open(filepath) as f:
                 f = bz2.BZ2File(filename=f)
                 # Workaround due to: https://github.com/tensorflow/tensorflow/issues/33563
@@ -196,7 +209,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
                 context = etree.iterparse(utf_f, events=("end",))
                 for unused_event, elem in context:
                     counter += 1
-                    if counter > 100000 :
+                    if counter > 100 :
                         break
                     if not elem.tag.endswith("page"):
                         continue
