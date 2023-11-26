@@ -34,18 +34,28 @@ def create_file_progress(session_id, file_name, total):
     with closing(connect_to_db()) as conn:
         with conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO file_progression (session_id, file_name, status, total) VALUES (%s, %s, %s, %s);",
+                "INSERT INTO file_progression (session_id, file_name, status, total,progress) VALUES (%s, %s, %s, %s,0);",
                 (session_id, file_name, "init", total)
             )
             conn.commit()
 
 # Function to update file progress
-def update_file_progress(session_id, file_name, progress):
+def update_file_progress(session_id, file_name, progress, current_title, current_id):
     with closing(connect_to_db()) as conn:
         with conn.cursor() as cursor:
             cursor.execute(
-                "UPDATE file_progression SET status='progress', progress= %s WHERE session_id=%s AND filename=%s;",
-                (progress, session_id, file_name)
+                "UPDATE file_progression SET status='progress', progress= %s, current_title=%s, current_id=%s WHERE session_id=%s AND file_name=%s;",
+                (progress,current_title,current_id, session_id, file_name)
+            )
+            conn.commit()
+
+# Function to set file progress
+def set_file_progress(session_id, file_name, total):
+    with closing(connect_to_db()) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE file_progression SET status='init', total=%s WHERE session_id=%s AND file_name=%s;",
+                (total, session_id, file_name)
             )
             conn.commit()
 

@@ -58,9 +58,9 @@ def main(
             "language": language.replace("-", "_"),
             "date": date,
             "mirror_url": mirror_url,
-            "beam_runner": "DirectRunner",
+            #"beam_runner": "DirectRunner",
             #"beam_runner": "apache_beam.runners.dask.dask_runner.DaskRunner",
-            #"beam_runner": "FlinkRunner",
+            "beam_runner": "FlinkRunner",
             #"beam_options": options,
         }
         if cache_dirpath:
