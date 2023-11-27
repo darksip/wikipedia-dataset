@@ -44,8 +44,8 @@ def main(
             "language": language.replace("-", "_"),
             "date": date,
             "mirror_url": mirror_url,
-            #"beam_runner": "DirectRunner",
-             "beam_runner": "apache_beam.runners.dask.dask_runner.DaskRunner",
+            "beam_runner": "DirectRunner",
+            #"beam_runner": "apache_beam.runners.dask.dask_runner.DaskRunner",
         }
         if cache_dirpath:
             build_kwargs["cache_dir"] = str(cache_dirpath)

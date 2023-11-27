@@ -1,17 +1,29 @@
 import os
+import sys
 import psycopg2
 from dotenv import load_dotenv
 from contextlib import closing
 
 # Load environment variables
-load_dotenv()
+success = load_dotenv(dotenv_path="./.env" ,verbose=True)
 
+if not success:
+    print("Error loading .env file")
+    sys.exit()
 # Database connection parameters
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
+
+DBG_LIMIT = os.getenv("DBG_LIMIT")
+
+print(f"Connecting to database {DB_NAME} on {DB_HOST}:{DB_PORT}")
+print(f"Debug limit is {DBG_LIMIT} rows")
+
+def get_debug_limit():
+    return int(DBG_LIMIT) if DBG_LIMIT else None
 
 # Function to connect to the database
 def connect_to_db():

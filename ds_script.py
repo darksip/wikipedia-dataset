@@ -115,6 +115,8 @@ class Wikipedia(datasets.BeamBasedBuilder):
         for lang in WIKIPEDIA_LANGUAGES
     ]
 
+    DEBUG_LIMIT=get_debug_limit()
+
     session_id = 0
     #logging.basicConfig(filename='unhandled_templates.log', level=logging.INFO)
     #progress = 0
@@ -204,6 +206,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
             print(f"generating examples from = {filepath}")
             counter=0
             print(f"session_id for db storage is {self.session_id}")
+            print("debug limit is", self.DEBUG_LIMIT)
 
             fname=os.path.basename(filepath)
             create_file_progress(self.session_id,fname,counter)
@@ -214,8 +217,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
                 utf_f = codecs.getreader("utf-8")(f)
                 context = etree.iterparse(utf_f, events=("end",))
                 for unused_event, elem in context:
-                    
-                    if counter > 30000 :
+                    if self.DEBUG_LIMIT and counter > self.DEBUG_LIMIT :
                         break
                     if not elem.tag.endswith("page"):
                         continue

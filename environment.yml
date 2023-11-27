@@ -1,4 +1,4 @@
-name: wikibuild
+name: wikipedia
 channels:
   - conda-forge
   - defaults
