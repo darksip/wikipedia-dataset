@@ -25,10 +25,12 @@ import xml.etree.cElementTree as etree
 from urllib.parse import quote
 
 import datasets
+from datetime import datetime
 
 from .category_aliases import CATEGORY_ALIASES
 from .lang_def import WIKIPEDIA_LANGUAGES
 from .media_aliases import MEDIA_ALIASES
+from .db_operations import *
 
 logger = datasets.logging.get_logger(__name__)
 
@@ -113,6 +115,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
         for lang in WIKIPEDIA_LANGUAGES
     ]
 
+    session_id = 0
     #logging.basicConfig(filename='unhandled_templates.log', level=logging.INFO)
     #progress = 0
 
@@ -144,10 +147,13 @@ class Wikipedia(datasets.BeamBasedBuilder):
         lang = self.config.language
 
         info_url = _base_url(lang) + _INFO_FILE
+        print(f"Downloading info file from {info_url}")
         # Use dictionary since testing mock always returns the same result.
         downloaded_files = dl_manager.download_and_extract({"info": info_url})
 
         xml_urls = []
+        file_names = []
+
         total_bytes = 0
         with open(downloaded_files["info"], encoding="utf-8") as f:
             dump_info = json.load(f)
@@ -164,6 +170,13 @@ class Wikipedia(datasets.BeamBasedBuilder):
                 continue
             total_bytes += info["size"]
             xml_urls.append(_base_url(lang) + fname)
+            file_names.append((fname,total_bytes))
+
+        nbfiles = len(file_names)
+        now = datetime.now()
+
+        self.session_id = insert_new_session(now, lang, self.config.date, nbfiles)
+        print(f"session_id={self.session_id}")
 
             # Use dictionary since testing mock always returns the same result.
         downloaded_files = dl_manager.download({"xml": xml_urls})
@@ -184,28 +197,36 @@ class Wikipedia(datasets.BeamBasedBuilder):
         import apache_beam as beam
         import mwparserfromhell
 
+
         def _extract_content(filepath):
             """Extracts article content from a single WikiMedia XML file."""
             logger.info("generating examples from = %s", filepath)
             print(f"generating examples from = {filepath}")
             counter=0
+            print(f"session_id for db storage is {self.session_id}")
+
+            fname=os.path.basename(filepath)
+            create_file_progress(self.session_id,fname,counter)
+            
             with beam.io.filesystems.FileSystems.open(filepath) as f:
                 f = bz2.BZ2File(filename=f)
                 # Workaround due to: https://github.com/tensorflow/tensorflow/issues/33563
                 utf_f = codecs.getreader("utf-8")(f)
                 context = etree.iterparse(utf_f, events=("end",))
                 for unused_event, elem in context:
-                    counter += 1
-                    if counter > 100000 :
+                    
+                    if counter > 30000 :
                         break
                     if not elem.tag.endswith("page"):
                         continue
+                    counter += 1
                     namespace = elem.tag[:-4]
                     title = elem.find(f"./{namespace}title").text
                     ns = elem.find(f"./{namespace}ns").text
                     id_ = elem.find(f"./{namespace}id").text
                     red_ = elem.find(f"./{namespace}redirect")
 
+                    
                     # Filter pages that are not in the "main" namespace.
                     if ns != "0":
                         elem.clear()
@@ -224,12 +245,24 @@ class Wikipedia(datasets.BeamBasedBuilder):
                         continue
 
                     beam.metrics.Metrics.counter(language, "extracted-examples").inc()
-                    yield (id_, title, raw_content)
-                print("end loop")
+#                    yield (id_, title, raw_content)
+                    ret = _clean_content((id_, title, raw_content),language)
+                    if ret == None:
+                        continue
+                    id,jsonobj = ret
+                    if counter % 10 == 0:
+                        print(f"counter:{counter}")
+                        update_file_progress(self.session_id,fname,counter,title,id)
+
+                    yield id,jsonobj
+                
+                print(f"end loop {fname}")
+                
 
         def _clean_content(inputs, language):
             """Cleans raw wikicode to extract text."""
             id_, title, raw_content = inputs
+            #print(f"id:{id_}")
             #progress += 1
             #if progress % 10 == 0:
             #    print("progression : ", progress)
@@ -248,16 +281,16 @@ class Wikipedia(datasets.BeamBasedBuilder):
 
             url = _construct_url(title, language)
 
-            beam.metrics.Metrics.counter(language, "cleaned-examples").inc()
+            #beam.metrics.Metrics.counter(language, "cleaned-examples").inc()
 
-            yield id_, {"id": id_, "url": url, "title": title, "text": text}
+            return id_, {"id": id_, "url": url, "title": title, "text": text}
 
         return (
             pipeline
             | "Initialize" >> beam.Create(filepaths)
             | "Extract content" >> beam.FlatMap(_extract_content)
             | "Distribute" >> beam.transforms.Reshuffle()
-            | "Clean content" >> beam.FlatMap(_clean_content, language=language)
+#            | "Clean content" >> beam.FlatMap(_clean_content, language=language)
         )
 
 def load_file_to_list(file_path):
