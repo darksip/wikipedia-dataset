@@ -29,12 +29,13 @@ def main(
     flink_options = {
         'runner': 'FlinkRunner',
         #'flink_master': 'localhost:8081',  # Replace with your Flink master URL
-        'parallelism': 5,  # Set the parallelism
+        'parallelism': 30,  # Set the parallelism
         # Add other Flink specific options here
         'temp_location': '/Users/pierresiccardi/.cache/huggingface/datasets/ds_script/'
     }
 
     options = PipelineOptions(flags=[], **flink_options)
+
 
     for language in languages:
         print("=====================")
@@ -61,7 +62,7 @@ def main(
             #"beam_runner": "DirectRunner",
             #"beam_runner": "apache_beam.runners.dask.dask_runner.DaskRunner",
             "beam_runner": "FlinkRunner",
-            #"beam_options": options,
+            "beam_options": options,
         }
         if cache_dirpath:
             build_kwargs["cache_dir"] = str(cache_dirpath)
