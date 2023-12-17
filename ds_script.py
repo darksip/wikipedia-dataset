@@ -441,7 +441,10 @@ def _parse_and_clean_wikicode(raw_content, parser, language):
             # Create the markdown heading
             markdown_heading = "#" * level + " " + heading
             # Replace the heading with its markdown equivalent
-            section_raw = re.sub(re.escape(f"z{heading}z"), markdown_heading, section_raw, count=1)
+            try:
+                section_raw = re.sub(re.escape(f"z{heading}z"), markdown_heading, section_raw, count=1)
+            except ValueError:
+                print(f"Section heading {heading} not found to replace")
         section_text.append(re.sub(re_rm_magic, "", section_raw))
     return "\n\n".join(section_text)
 
