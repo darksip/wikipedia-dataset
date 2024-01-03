@@ -144,7 +144,10 @@ def stream_decompress_and_parse_xml(filename,language):
                     ).text
                     elem.clear()
                     counter += 1
-                    clean_content = _parse_and_clean_wikicode(raw_content,language)
+                    try:
+                        clean_content = _parse_and_clean_wikicode(raw_content,language)
+                    except:
+                        clean_content = raw_content
                     url = _construct_url(title, language)
 
                     # build the structure in memory
@@ -154,7 +157,7 @@ def stream_decompress_and_parse_xml(filename,language):
                     db_max = id_
 
                     if counter%100==0:
-                        if len(data_batch) >= 1000:
+                        if len(data_batch) >= 50000:
                             fname=f"data/{_DATE}/{language}/p{db_min}p{db_max}.parquet"
                             df=pd.DataFrame(data_batch)
                             
