@@ -2,3 +2,6 @@ __pycache__
 env.yml
 data/*
 '/Users/pierresiccardi/.cache/huggingface/datasets/*
+*.bz2
+*.parquet
+

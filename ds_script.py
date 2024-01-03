@@ -27,10 +27,10 @@ from urllib.parse import quote
 import datasets
 from datetime import datetime
 
-from .category_aliases import CATEGORY_ALIASES
-from .lang_def import WIKIPEDIA_LANGUAGES
-from .media_aliases import MEDIA_ALIASES
-from .db_operations import *
+from category_aliases import CATEGORY_ALIASES
+from lang_def import WIKIPEDIA_LANGUAGES
+from media_aliases import MEDIA_ALIASES
+from db_operations import *
 
 logger = datasets.logging.get_logger(__name__)
 
@@ -264,10 +264,7 @@ class Wikipedia(datasets.BeamBasedBuilder):
         def _clean_content(inputs, language):
             """Cleans raw wikicode to extract text."""
             id_, title, raw_content = inputs
-            #print(f"id:{id_}")
-            #progress += 1
-            #if progress % 10 == 0:
-            #    print("progression : ", progress)
+
             try:
                 text = _parse_and_clean_wikicode(
                     raw_content, parser=mwparserfromhell, language=language
