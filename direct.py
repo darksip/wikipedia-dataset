@@ -325,13 +325,15 @@ def main():
 
     print(f"number of files to download: {nbfiles}")
 
-    first_url = xml_urls[0]
-    local_filename = first_url.split('/')[-1]
+    for xml_url in xml_urls:
+        if xml_url == xml_urls[0]:
+            continue
+        local_filename = xml_url.split('/')[-1]
 
-    if not os.path.exists(local_filename):
-        download_file(first_url, local_filename)
+        if not os.path.exists(local_filename):
+            download_file(xml_url, local_filename)
 
-    stream_decompress_and_parse_xml(local_filename,lang)
+        stream_decompress_and_parse_xml(local_filename,lang)
 
 if __name__ == "__main__":
     main()
