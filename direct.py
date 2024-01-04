@@ -158,7 +158,7 @@ def stream_decompress_and_parse_xml(filename,language):
 
                     if counter%100==0:
                         if len(data_batch) >= 50000:
-                            fname=f"data/{_DATE}/{language}/p{db_min}p{db_max}.parquet"
+                            fname=f"data/{_DATE}/{language}/train-wikipedia-fr-p{db_min}p{db_max}.parquet"
                             df=pd.DataFrame(data_batch)
                             
                             df.to_parquet(fname,index=False)
