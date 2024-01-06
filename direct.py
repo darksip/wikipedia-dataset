@@ -332,7 +332,8 @@ def main():
 
         if not os.path.exists(local_filename):
             download_file(xml_url, local_filename)
-
+        else:
+            continue
         stream_decompress_and_parse_xml(local_filename,lang)
 
 if __name__ == "__main__":
