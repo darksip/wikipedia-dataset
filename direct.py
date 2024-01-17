@@ -82,14 +82,68 @@ def _construct_url(title, language):
 
 def load_file_to_list(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
-        return [line.strip().lower() for line in file]
+        # Utiliser un set pour éliminer les doublons et puis convertir de nouveau en liste
+        return list(set([line.strip().lower() for line in file]))
+
+def count_matching_words(text, keywords_list):
+    # Convertir le texte en une liste de mots en minuscules
+    words_in_text = text.lower().split()
+
+    # Compter le nombre de mots qui correspondent aux mots-clés
+    count = 0
+    for word in words_in_text:
+        if word in keywords_list:
+            count += 1
+    return count
+
+def matching_words(text, keywords_list):
+    # Convertir le texte en une liste de mots en minuscules
+    words_in_text = text.lower().split()
+    words_found=[]
+    # Compter le nombre de mots qui correspondent aux mots-clés
+    count = 0
+    for word in words_in_text:
+        if word in keywords_list:
+            words_found.append(word)
+            count += 1
+    return set(words_found), len(set(words_found))
+
+def is_about_music(text):
+    return count_matching_words(text, corpus_music)
 
 def is_in_list(string_to_check, list_of_strings):
     return string_to_check.lower() in list_of_strings
 
+def find_infobox_type(content):
+    # Expression régulière pour capturer le type d'Infobox
+    infobox_pattern = r"\{\{Infobox ([^\n]+)"
+
+    # Recherche de l'Infobox dans le contenu
+    match = re.search(infobox_pattern, content)
+
+    # Si une Infobox est trouvée, extraire le type
+    if match:
+        return match.group(1).strip()
+    else:
+        return ""
+    
 tmp_to_concat = load_file_to_list("template_to_concat.txt")
 tmp_to_params = load_file_to_list("template_to_params.txt")
 tmp_to_ignore = load_file_to_list("template_to_ignore.txt")
+tmp_music = load_file_to_list("template_music.txt")
+corpus_music = load_file_to_list("corpus_music.txt")
+
+def is_music_template(template_name):
+    return is_in_list(template_name, tmp_music)
+
+def is_music_template_content(content):
+    infobox = find_infobox_type(content)
+    if infobox=="":
+        return 0
+    if is_music_template(infobox):
+        return 1
+    else:
+        return 2
 
 def extract_page_range(filename):
     # Regular expression to match the pattern 'p<number>p<number>'
@@ -103,6 +157,15 @@ def extract_page_range(filename):
 
 import pandas as pd
 import pyarrow.parquet as pq
+
+def add_to_file(title, count, file_path):
+    # Construire la ligne à ajouter
+    line = f"{title} - {count}\n"
+
+    # Ouvrir le fichier en mode 'append' et ajouter la ligne
+    with open(file_path, 'a', encoding='utf-8') as file:
+        file.write(line)
+
 
 def stream_decompress_and_parse_xml(filename,language):
 
@@ -145,6 +208,22 @@ def stream_decompress_and_parse_xml(filename,language):
                     elem.clear()
                     counter += 1
                     try:
+                        music_template = is_music_template_content(raw_content)
+                        nwords=0
+                        if music_template==0:
+                            # l'infobox n'est pas musique on contrôle les mots-clés
+                            nwords = is_about_music(raw_content)
+                            if nwords <= 3:
+                                add_to_file(title, nwords, "is_not_music.txt")
+                                continue
+                            mw,nw = matching_words(raw_content, corpus_music)
+                            if nw <= 2:
+                                add_to_file(title, nw, "is_not_music.txt")
+                                continue
+                            if music_template==2:
+                                add_to_file(title, nw, "is_not_music.txt")
+                                continue
+                        add_to_file(title, nwords, "is_music.txt")
                         clean_content = _parse_and_clean_wikicode(raw_content,language)
                     except:
                         clean_content = raw_content
@@ -164,7 +243,7 @@ def stream_decompress_and_parse_xml(filename,language):
                             df.to_parquet(fname,index=False)
                             data_batch=[]
         # dont forget the last batch
-        fname=f"data/{_DATE}/{language}/p{db_min}p{db_max}.parquet"
+        fname=f"data/{_DATE}/{language}/train-wikipedia-fr-p{db_min}p{db_max}.parquet"
         df=pd.DataFrame(data_batch)
         df.to_parquet(fname,index=False)
         data_batch=[]
@@ -332,8 +411,8 @@ def main():
 
         if not os.path.exists(local_filename):
             download_file(xml_url, local_filename)
-        else:
-            continue
+        #else:
+        #    continue
         stream_decompress_and_parse_xml(local_filename,lang)
 
 if __name__ == "__main__":
