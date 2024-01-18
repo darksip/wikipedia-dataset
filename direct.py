@@ -158,9 +158,9 @@ def extract_page_range(filename):
 import pandas as pd
 import pyarrow.parquet as pq
 
-def add_to_file(title, count, file_path):
+def add_to_file(title, count,words, file_path):
     # Construire la ligne à ajouter
-    line = f"{title} - {count}\n"
+    line = f"{title} - {count} : {words}\n"
 
     # Ouvrir le fichier en mode 'append' et ajouter la ligne
     with open(file_path, 'a', encoding='utf-8') as file:
@@ -207,26 +207,26 @@ def stream_decompress_and_parse_xml(filename,language):
                     ).text
                     elem.clear()
                     counter += 1
-                    try:
-                        music_template = is_music_template_content(raw_content)
-                        nwords=0
-                        if music_template==0:
-                            # l'infobox n'est pas musique on contrôle les mots-clés
-                            nwords = is_about_music(raw_content)
-                            if nwords <= 3:
-                                add_to_file(title, nwords, "is_not_music.txt")
-                                continue
-                            mw,nw = matching_words(raw_content, corpus_music)
-                            if nw <= 2:
-                                add_to_file(title, nw, "is_not_music.txt")
-                                continue
-                            if music_template==2:
-                                add_to_file(title, nw, "is_not_music.txt")
-                                continue
-                        add_to_file(title, nwords, "is_music.txt")
-                        clean_content = _parse_and_clean_wikicode(raw_content,language)
-                    except:
-                        clean_content = raw_content
+                    #try:
+                        #music_template = is_music_template_content(raw_content)
+                    nwords=0
+                    # if music_template==0:
+                        # l'infobox n'est pas musique on contrôle les mots-clés
+                    nwords = is_about_music(raw_content)
+                    if nwords <= 5:
+                        add_to_file(title, nwords,[], "is_not_music.txt")
+                        continue
+                    mw,nw = matching_words(raw_content, corpus_music)
+                    if nw <= 3:
+                        add_to_file(title, nw,mw, "is_not_music.txt")
+                        continue
+                        # if music_template==2:
+                        #     add_to_file(title, nw, "is_not_music.txt")
+                        #     continue
+                    add_to_file(title, nwords,mw, "is_music.txt")
+                    clean_content = _parse_and_clean_wikicode(raw_content,language)
+                    #except:
+                    #   clean_content = raw_content
                     url = _construct_url(title, language)
 
                     # build the structure in memory

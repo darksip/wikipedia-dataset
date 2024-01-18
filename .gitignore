@@ -4,4 +4,6 @@ data/*
 '/Users/pierresiccardi/.cache/huggingface/datasets/*
 *.bz2
 *.parquet
+is_music.txt
+is_not_music.txt
 
